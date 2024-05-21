@@ -23,7 +23,7 @@
       }
 
       body {
-        background: linear-gradient(rgb(204, 71, 71), rgb(131, 18, 206));
+        background-color: #b13f5b;
         background-image: url("bg.png");
         font-family: "Raleway", sans-serif;
         background-size: cover;
@@ -32,12 +32,46 @@
         background-attachment: fixed;
         color: #fff;
         display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .content {
+        height: 100%;
+        width: 100%;
+        display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        overflow: hidden;
         opacity: 0;
         transition: 1s all ease;
+      }
+
+      #loader {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+
+        width: 90px;
+        height: 14px;
+        --c: #fff 92%, #0000;
+        background: radial-gradient(circle closest-side, var(--c))
+            calc(100% / -4) 0,
+          radial-gradient(circle closest-side, var(--c)) calc(100% / 4) 0;
+        background-size: calc(100% / 2) 100%;
+        animation: l14 1.5s infinite;
+      }
+      @keyframes l14 {
+        0% {
+          background-position: calc(100% / -4) 0, calc(100% / 4) 0;
+        }
+        50% {
+          background-position: calc(100% / -4) -14px, calc(100% / 4) 14px;
+        }
+        100% {
+          background-position: calc(100% / 4) -14px, calc(3 * 100% / 4) 14px;
+        }
       }
 
       h1 {
@@ -49,7 +83,7 @@
       .wrapper {
         display: flex;
         width: 100%;
-        justify-content: space-around;
+        justify-content: space-evenly;
       }
 
       .results {
@@ -211,41 +245,49 @@
     </style>
 
     <script>
-      window.addEventListener("DOMContentLoaded", () => {
-        document.body.style.opacity = 1;
-        console.log("loaded");
-      });
+      document.onreadystatechange = function () {
+        if (document.readyState !== "complete") {
+          document.querySelector(".content").style.opacity = 0;
+          document.querySelector("#loader").style.visibility = "visible";
+        } else {
+          document.querySelector("#loader").style.display = "none";
+          document.querySelector(".content").style.opacity = 1;
+        }
+      };
     </script>
   </head>
 
   <body>
-    <h1>Вертикальное колесо фортуны</h1>
+    <div id="loader"></div>
+    <div class="content">
+      <h1>Вертикальное колесо фортуны</h1>
 
-    <div class="wrapper">
-      <div class="results">
-        <h2>Выпавшие сегменты:</h2>
-        <ul id="resultsList"></ul>
-      </div>
-      <div class="wheel-container">
-        <div class="wheel" id="wheel">
-          <div class="fish-eye top"></div>
-          <div class="fish-eye bottom"></div>
-          <div class="triangle"></div>
-          <div class="triangle left"></div>
-          <div class="options" id="options"></div>
+      <div class="wrapper">
+        <div class="results">
+          <h2>Выпавшие сегменты:</h2>
+          <ul id="resultsList"></ul>
+        </div>
+        <div class="wheel-container">
+          <div class="wheel" id="wheel">
+            <div class="fish-eye top"></div>
+            <div class="fish-eye bottom"></div>
+            <div class="triangle"></div>
+            <div class="triangle left"></div>
+            <div class="options" id="options"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="buttons-container">
-      <button
-        id="resetButton"
-        style="display: none"
-        onclick="location.reload();"
-      >
-        Сбросить
-      </button>
-      <button id="spinButton">Крутить</button>
+      <div class="buttons-container">
+        <button
+          id="resetButton"
+          style="display: none"
+          onclick="location.reload();"
+        >
+          Сбросить
+        </button>
+        <button id="spinButton">Крутить</button>
+      </div>
     </div>
 
     <script>
@@ -314,7 +356,9 @@
         "Option 54",
       ];
 
-      const wheelSound = new Audio("wheel.m4a");
+      const wheelSound = new Audio(
+        "wheel.m4a"
+      );
 
       const shuffleArray = (array) => {
         for (let i = array.length - 1; i > 0; i--) {
