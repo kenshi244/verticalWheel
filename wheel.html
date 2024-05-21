@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Вертикальное колесо фортуны</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      @import url("https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap-reboot.min.css");
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        min-height: 100svh;
+      }
+
+      body {
+        background: linear-gradient(rgb(204, 71, 71), rgb(131, 18, 206));
+        background-image: url("bg.png");
+        font-family: "Raleway", sans-serif;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        opacity: 0;
+        transition: 1s all ease;
+      }
+
+      h1 {
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+      }
+
+      .wrapper {
+        display: flex;
+        width: 100%;
+        justify-content: space-around;
+      }
+
+      .results {
+        padding: 100px 20px;
+        order: 1;
+      }
+
+      .wheel-container {
+        order: 2;
+      }
+
+      #wheel {
+        width: 550px;
+        height: 550px;
+        display: block;
+        position: relative;
+        background-color: rgb(204, 21, 21);
+        margin: 70px 0;
+        background: linear-gradient(rgb(204, 71, 71), rgb(120, 215, 255))
+            padding-box,
+          linear-gradient(
+              90deg,
+              rgba(131, 58, 180, 1) 0%,
+              rgba(253, 29, 29, 1) 50%,
+              rgba(252, 176, 69, 1) 100%
+            )
+            border-box;
+        border-radius: 50%;
+        border: 15px solid transparent;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      .triangle {
+        width: 60px;
+        height: 60px;
+        clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+        background-color: #fd1d59;
+        transform: translateY(-50%) rotate(-90deg);
+        position: absolute;
+        top: 50%;
+        /* Располагаем по центру вертикали */
+        right: 0px;
+        z-index: 1;
+      }
+
+      .triangle.left {
+        transform: translateY(-50%) rotate(90deg);
+        /* Поворачиваем на 180 градусов */
+        right: initial;
+        left: 0px;
+      }
+
+      .fish-eye {
+        width: 100%;
+        height: 50px;
+        position: absolute;
+        background: rgba(0, 0, 0, 0.5);
+        mix-blend-mode: multiply;
+        z-index: 2;
+      }
+
+      .top {
+        top: -16px;
+        filter: blur(15px) brightness(80%) contrast(140%);
+      }
+
+      .bottom {
+        bottom: -16px;
+        filter: blur(15px) brightness(80%) contrast(140%);
+      }
+
+      .options {
+        width: 100%;
+        transition: transform 5s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+
+      .segment {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 70px;
+        font-weight: bold;
+        font-size: 20px;
+      }
+
+      .buttons-container {
+        display: flex;
+        gap: 0 15px;
+      }
+
+      button {
+        outline: none;
+        border: none;
+        background: #fd1d59;
+        color: #fff;
+        cursor: pointer;
+        padding: 15px 70px;
+        font-size: 21px;
+        text-transform: uppercase;
+        border-radius: 30px;
+        transition: all 0.4s ease;
+      }
+
+      button:hover {
+        background: #e21048;
+      }
+
+      button:disabled {
+        background: #ccc;
+        cursor: default;
+      }
+
+      @media screen and (max-width: 768px) {
+        html,
+        body {
+          height: initial;
+        }
+
+        h1 {
+          text-align: center;
+          margin: 20px;
+          letter-spacing: 0px;
+        }
+
+        .wrapper {
+          flex-direction: column;
+        }
+
+        .results {
+          padding: 0px 20px 100px;
+          order: 2;
+        }
+
+        .results h2 {
+          text-align: center;
+        }
+
+        .wheel-container {
+          order: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        #wheel {
+          --size: 90vw;
+          width: var(--size);
+          height: var(--size);
+        }
+
+        .buttons-container {
+          flex-direction: column-reverse;
+          gap: 20px 0;
+        }
+      }
+    </style>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        document.body.style.opacity = 1;
+        console.log("loaded");
+      });
+    </script>
+  </head>
+
+  <body>
+    <h1>Вертикальное колесо фортуны</h1>
+
+    <div class="wrapper">
+      <div class="results">
+        <h2>Выпавшие сегменты:</h2>
+        <ul id="resultsList"></ul>
+      </div>
+      <div class="wheel-container">
+        <div class="wheel" id="wheel">
+          <div class="fish-eye top"></div>
+          <div class="fish-eye bottom"></div>
+          <div class="triangle"></div>
+          <div class="triangle left"></div>
+          <div class="options" id="options"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons-container">
+      <button
+        id="resetButton"
+        style="display: none"
+        onclick="location.reload();"
+      >
+        Сбросить
+      </button>
+      <button id="spinButton">Крутить</button>
+    </div>
+
+    <script>
+      const wheel = document.querySelector("#wheel");
+      const wheelOptions = document.querySelector("#options");
+      const spinButton = document.querySelector("#spinButton");
+      const resetButton = document.querySelector("#resetButton");
+      const resultsList = document.querySelector("#resultsList");
+
+      const segmentHeight = 60; // Height of each segment in pixels
+
+      let options = [
+        "Option 1",
+        "Option 2",
+        "Option 3",
+        "Option 4",
+        "Option 5",
+        "Option 6",
+        "Option 7",
+        "Option 8",
+        "Option 9",
+        "Option 10",
+        "Option 11",
+        "Option 12",
+        "Option 13",
+        "Option 14",
+        "Option 15",
+        "Option 16",
+        "Option 17",
+        "Option 18",
+        "Option 19",
+        "Option 20",
+        "Option 21",
+        "Option 22",
+        "Option 23",
+        "Option 24",
+        "Option 25",
+        "Option 26",
+        "Option 27",
+        "Option 28",
+        "Option 29",
+        "Option 30",
+        "Option 31",
+        "Option 32",
+        "Option 33",
+        "Option 34",
+        "Option 35",
+        "Option 36",
+        "Option 37",
+        "Option 38",
+        "Option 39",
+        "Option 40",
+        "Option 41",
+        "Option 42",
+        "Option 43",
+        "Option 44",
+        "Option 45",
+        "Option 46",
+        "Option 47",
+        "Option 48",
+        "Option 49",
+        "Option 50",
+        "Option 51",
+        "Option 52",
+        "Option 53",
+        "Option 54",
+      ];
+
+      const wheelSound = new Audio("wheel.m4a");
+
+      const shuffleArray = (array) => {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      };
+
+      const colors = [
+        "#FF6F91",
+        "#FF9671",
+        "#FFC75F",
+        "#00C9A7",
+        "#C2095A",
+        "#ED1C24",
+        "#235789",
+        "#3A1772",
+        "#287B61",
+      ];
+
+      const appendOptionsToWheel = (opts) => {
+        wheelOptions.innerHTML = "";
+        opts = shuffleArray(opts);
+        let colorIndex = 0;
+
+        for (let i = 0; i < options.length * 3; i++) {
+          // Duplicate the options for infinite scroll
+          const segment = document.createElement("div");
+          segment.classList.add("segment");
+          segment.innerText = opts[i % options.length]; // Repeat the options
+          segment.style.height = `${segmentHeight}px`;
+          segment.style.backgroundColor = colors[colorIndex];
+          colorIndex = (colorIndex + 1) % colors.length; // Move to the next color
+
+          wheelOptions.appendChild(segment);
+        }
+      };
+
+      appendOptionsToWheel(options);
+
+      const spinWheel = () => {
+        spinButton.disabled = true;
+        wheelOptions.style.transition = "none"; // Disable transition to reset position
+        wheelOptions.style.transform = "translateY(0px)"; // Reset position
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // Re-enable transition after resetting
+            wheelOptions.style.transition =
+              "transform 5s cubic-bezier(0.22, 0.61, 0.36, 1)";
+            const totalHeight = segmentHeight * options.length;
+            const randomSpin =
+              Math.floor(Math.random() * options.length) * segmentHeight;
+            const spins = 1;
+            const totalSpinHeight = spins * totalHeight + randomSpin;
+            wheelSound.play();
+
+            wheelOptions.style.transform = `translateY(-${totalSpinHeight}px)`;
+
+            setTimeout(() => {
+              spinButton.disabled = false;
+              checkSelectedSegment(totalSpinHeight % totalHeight);
+            }, 5000);
+          });
+        });
+      };
+
+      const checkSelectedSegment = (finalPosition) => {
+        const wheelCenterOffset = wheel.clientHeight / 2; // Центр колеса
+        const segmentIndex =
+          Math.floor((finalPosition + wheelCenterOffset) / segmentHeight) %
+          options.length;
+        const selectedSegment = options[segmentIndex];
+
+        // Display the selected segment in the results list
+        const resultItem = document.createElement("li");
+        resultItem.innerText = selectedSegment;
+        resultsList.appendChild(resultItem);
+
+        // Remove the selected segment from the options
+        options.splice(segmentIndex, 1);
+        resetButton.style.display = "block";
+
+        const selectedSegmentElement =
+          document.querySelectorAll(".segment")[segmentIndex];
+        selectedSegmentElement.style.opacity = 0;
+        selectedSegmentElement.style.display = "none";
+        console.log(selectedSegmentElement);
+
+        // Re-append options to the wheel without the selected segment
+        appendOptionsToWheel(options);
+      };
+
+      spinButton.addEventListener("click", spinWheel);
+    </script>
+  </body>
+</html>
