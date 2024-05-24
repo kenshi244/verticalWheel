@@ -23,9 +23,10 @@
       }
 
       body {
+        padding: 100px 0;
         background-color: #b13f5b;
-        background-image: url("bg.png");
-        font-family: "Raleway", sans-serif;
+        background-image: url("https://github.com/kenshi244/verticalWheel/blob/master/bg.png?raw=true");
+        font-family: "Futura PT", sans-serif;
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -62,13 +63,16 @@
         background-size: calc(100% / 2) 100%;
         animation: l14 1.5s infinite;
       }
+
       @keyframes l14 {
         0% {
           background-position: calc(100% / -4) 0, calc(100% / 4) 0;
         }
+
         50% {
           background-position: calc(100% / -4) -14px, calc(100% / 4) 14px;
         }
+
         100% {
           background-position: calc(100% / 4) -14px, calc(3 * 100% / 4) 14px;
         }
@@ -88,11 +92,21 @@
 
       .results {
         padding: 100px 20px;
-        order: 1;
+        padding-bottom: 0;
+        margin: 0;
+      }
+
+      .results ul {
+        padding: 0;
+        margin: 0;
+        height: 540px;
       }
 
       .wheel-container {
-        order: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
       }
 
       #wheel {
@@ -199,14 +213,10 @@
         cursor: default;
       }
 
-      @media screen and (max-width: 768px) {
+      @media screen and (max-width: 1024px) {
         html,
         body {
           height: initial;
-        }
-        
-        body {
-          padding: 30px 0;
         }
 
         h1 {
@@ -220,19 +230,19 @@
         }
 
         .results {
-          padding: 0px 20px 100px;
-          order: 2;
+          padding: 50px 20px 100px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
         }
 
         .results h2 {
           text-align: center;
         }
 
-        .wheel-container {
-          order: 1;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+        .results ul {
+          padding: 20px;
         }
 
         #wheel {
@@ -264,13 +274,9 @@
   <body>
     <div id="loader"></div>
     <div class="content">
-      <h1>Вертикальное колесо фортуны</h1>
+      <h1>Колесо фортуны</h1>
 
       <div class="wrapper">
-        <div class="results">
-          <h2>Выпавшие сегменты:</h2>
-          <ul id="resultsList"></ul>
-        </div>
         <div class="wheel-container">
           <div class="wheel" id="wheel">
             <div class="fish-eye top"></div>
@@ -279,19 +285,22 @@
             <div class="triangle left"></div>
             <div class="options" id="options"></div>
           </div>
+          <button id="spinButton">Крутить</button>
+        </div>
+        <div class="results">
+          <h2>Выпавшие сегменты:</h2>
+          <ul id="resultsList"></ul>
+          <button
+            id="resetButton"
+            style="display: none"
+            onclick="location.reload();"
+          >
+            Сбросить
+          </button>
         </div>
       </div>
 
-      <div class="buttons-container">
-        <button
-          id="resetButton"
-          style="display: none"
-          onclick="location.reload();"
-        >
-          Сбросить
-        </button>
-        <button id="spinButton">Крутить</button>
-      </div>
+      <div class="buttons-container"></div>
     </div>
 
     <script>
@@ -361,7 +370,7 @@
       ];
 
       const wheelSound = new Audio(
-        "wheel.m4a"
+        "https://github.com/kenshi244/verticalWheel/blob/master/wheel.wav?raw=true"
       );
 
       const shuffleArray = (array) => {
@@ -384,12 +393,35 @@
         "#287B61",
       ];
 
+      let spins;
+
       const appendOptionsToWheel = (opts) => {
         wheelOptions.innerHTML = "";
         opts = shuffleArray(opts);
         let colorIndex = 0;
+        let duplicateCount;
 
-        for (let i = 0; i < options.length * 3; i++) {
+        if (options.length >= 50) {
+          duplicateCount = 3;
+          spins = 1;
+        } else if (options.length >= 40) {
+          duplicateCount = 4;
+          spins = 2;
+        } else if (options.length >= 30) {
+          duplicateCount = 5;
+          spins = 3;
+        } else if (options.length >= 20) {
+          duplicateCount = 7;
+          spins = 4;
+        } else if (options.length > 10) {
+          duplicateCount = 8;
+          spins = 5;
+        } else {
+          duplicateCount = 10;
+          spins = 6;
+        }
+
+        for (let i = 0; i < options.length * duplicateCount; i++) {
           // Duplicate the options for infinite scroll
           const segment = document.createElement("div");
           segment.classList.add("segment");
@@ -416,7 +448,6 @@
             const totalHeight = segmentHeight * options.length;
             const randomSpin =
               Math.floor(Math.random() * options.length) * segmentHeight;
-            const spins = 1;
             const totalSpinHeight = spins * totalHeight + randomSpin;
             wheelSound.play();
 
